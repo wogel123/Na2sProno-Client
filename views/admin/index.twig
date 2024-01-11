@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>NA2S PRONO</title>
+
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/main.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a href="/" class="navbar-brand">
+                <img src="/assets/img/logo.png">
+                <div class="m-auto">
+                    <h4>Na2sProno</h4>
+                    <p>Pronostiqueur français</p>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" style="height: 90px;" id="navbar">
+
+                <div class="d-flex flex-column mx-auto">
+                    <h3 class="text-uppercase fw-bold mb-2">Espace administrateur</h3>
+                    <a href="/" class="btn btn-success btn-upper btn-sm btn-thin mx-auto" style="width: fit-content">Retour au site <i class="fa-solid fa-right-from-bracket ms-2"></i></a>
+                </div>
+
+                <div class="d-flex user-login ms-auto">
+                    <img src="/assets/img/user.png">
+                    <div class="d-flex flex-column">
+                        <p>{{ auth.user.username }}</p>
+                        <small>Administrateur</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container mb-5">
+    <section>
+        <div class="row mb-5">
+            <div class="col-md-3 d-flex">
+                <a href="#" class="btn btn-success btn-upper btn-pad btn-thin btn-shadow mx-auto">Stats</a>
+            </div>
+            <div class="col-md-3 d-flex">
+                <a href="#" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Pronos</a>
+            </div>
+            <div class="col-md-3 d-flex">
+                <a href="#" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Membres</a>
+            </div>
+            <div class="col-md-3 d-flex">
+                <a href="#" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Abonnements</a>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Membres</h5>
+                                <span class="h2 font-weight-bold mb-0">112</span>
+                            </div>
+                            <div class="col-auto d-flex">
+                                <div class="bg-danger text-white rounded-circle shadow d-flex m-auto" style="width: 50px; height: 50px">
+                                    <i class="fa-solid fa-users m-auto"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Abonnés</h5>
+                                <span class="h2 font-weight-bold mb-0">15</span>
+                            </div>
+                            <div class="col-auto d-flex">
+                                <div class="bg-warning text-white rounded-circle shadow d-flex m-auto" style="width: 50px; height: 50px">
+                                    <i class="fa-solid fa-rocket m-auto"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Pronostics</h5>
+                                <span class="h2 font-weight-bold mb-0">521</span>
+                            </div>
+                            <div class="col-auto d-flex">
+                                <div class="bg-success text-white rounded-circle shadow d-flex m-auto" style="width: 50px; height: 50px">
+                                    <i class="fa-solid fa-chart-line m-auto"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Bénéfices</h5>
+                                <span class="h2 font-weight-bold mb-0">1250 €</span>
+                            </div>
+                            <div class="col-auto d-flex">
+                                <div class="bg-info text-white rounded-circle shadow d-flex m-auto" style="width: 50px; height: 50px">
+                                    <i class="fa-solid fa-money-bill m-auto"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer class="mt-auto">
+    <div class="container d-flex">
+        <p>Tous droits réservés © 2022 <span>Na2sProno</span></p>
+        <p class="ms-auto">Développé par <a href="https://wogel123.fr">wogel123</a></p>
+    </div>
+</footer>
+
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/main.js"></script>
+<script src="/assets/js/tata.js"></script>
+
+</body>
+</html>

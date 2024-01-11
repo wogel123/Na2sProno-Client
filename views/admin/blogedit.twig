@@ -1,0 +1,275 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 5 %}
+{% block content %}
+
+    <div class="d-flex flex-column">
+            <h4 class="title mt-4 text-center fw-bold">Edition d'un article</h4>
+
+            <div class="d-flex mt-5 flex-column col-md-6 mx-auto">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Créé le</span>
+                    <input type="text" class="form-control text-center" id="created_at" style="font-size: 12px" value="{{ article.created_at }}" disabled>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Créé par</span>
+                    <input type="text" class="form-control text-center" id="created_at" style="font-size: 12px" value="{{ article.author.username }}" disabled>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Statut</span>
+                    <select class="form-select text-center" id="state" style="font-size: 12px; padding-left: 1rem">
+                        <option value="1" {% if article.state == '1' %}selected{% endif %}>Publié</option>
+                        <option value="0" {% if article.state == '0' %}selected{% endif %}>Non publié</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Titre</span>
+                    <input type="text" class="form-control text-center" id="title" style="font-size: 12px" value="{{ article.title }}">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Slug / URL</span>
+                    <input type="text" class="form-control text-center" id="slug" style="font-size: 12px" value="{{ article.slug }}">
+                </div>
+                <div id="illustration" class="d-flex flex-column">
+                    <input class="form-control form-control-sm label-file img-file-info" data-image="illustration" name="img-file" id="img-file" type="file" style="font-size: 12px; line-height: 23px">
+                    <img src="{{ article.img }}" alt="" class="img-file label-file mt-3" style="width: 100%;height: 300px">
+                    <input type="hidden" id="img-data">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="input-group mt-3">
+                    <textarea name="content" class="ckeditor" id="editor">{{ article.content }}</textarea>
+                </div>
+            </div>
+            <h5 class="mt-4 mb-2 text-center">Historique d'édition</h5>
+            <div id="history">
+                <table class="table table-sm table-striped">
+                    <tbody>
+                    {% for history in article.history %}
+                        <tr>
+                            <td>
+                                {{ history.updated_at | date('d/m/Y à H:i') }}
+                            </td>
+                            <td>
+                                <span> par {{ history.author.username }}</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            <input type="hidden" name="slug" value="{{ article.slug }}">
+            <input type="hidden" name="id" value="{{ article.id }}">
+
+            <button class="btn btn-success btn-pad btn-thin btn-upper btn-pad mx-auto mt-5" style="width: fit-content;" type="submit" id="submit">Envoyer</button>
+
+        </div>
+
+    <style>
+        .input-group-text {
+            width: 107px;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+    <script src="https://cdn.tiny.cloud/1/hnte9och4tbpba1pyvs1x04uic56zrfex0ie3wnq4k7kcwma/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="/assets/js/datepicker/bootstrap-datepicker.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            /**
+             * Editeur
+             */
+            tinymce.init({
+                selector: "textarea#editor",
+                height: 550,
+                width: '100%',
+                language: 'fr_FR',
+                plugins: "fullscreen code image link",
+                toolbar: "fullscreen fontselect fontsizeselect bold italic underline strikethrough link image forecolor backcolor alignleft aligncenter alignright alignjustify cut copy paste bullist numlist outdent indent blockquote code"
+            });
+
+
+            const illustrationContainer = document.getElementById('illustration');
+            const imageInput = illustrationContainer.querySelector("#img-file");
+            const imagePreview = illustrationContainer.querySelector(".img-file");
+            const imagePreviewInfo = illustrationContainer.querySelector(".img-file-info");
+            const imageData = illustrationContainer.querySelector("#img-data");
+            const stateSelector         = document.getElementById('state');
+            const historyContainer      = document.getElementById('history');
+            const slugInput             = document.getElementById("slug");
+            const titleInput            = document.getElementById("title");
+
+
+            /**
+             * Image preview
+             */
+            imageInput.addEventListener('change', function (e) {
+                e.preventDefault();
+                const file = this.files[0];
+                if (file && isFileImage(file)) {
+                    const reader = new FileReader();
+
+                    imagePreviewInfo.innerText = file.name;
+
+                    reader.addEventListener("load", function () {
+                        imagePreview.setAttribute("src", this.result)
+                        imageData.value = this.result
+                    });
+
+                    reader.readAsDataURL(file);
+
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // todo message
+                }
+            });
+
+
+            /**
+             * State
+             */
+
+            stateSelector.querySelectorAll('option').forEach((i) => {
+                if (i.value === "{{ article.state }}")
+                    i.selected = true;
+            });
+
+            /**
+             * Slug Validation
+             */
+
+            const buildHelper = (data) => {
+                let text = "";
+                data.forEach(el => {
+                    text += ' - ' + el + "\r\n";
+                })
+                return text;
+            }
+
+            slugInput.addEventListener('change', (e) => {
+                if (slugInput.value !== '{{ article.slug }}')
+                    $.ajax({
+                        method: 'POST',
+                        url: '/api/blog/checkSlug',
+                        data: {
+                            'title': titleInput.value,
+                            'slug': slugInput.value
+                        },
+                        success: (data) => {
+                            if (data.error) {
+                                $(slugInput).addClass('is-invalid')
+                                $(slugInput).removeClass('is-valid')
+                            } else {
+                                $(slugInput).removeClass('is-invalid')
+                                $(slugInput).addClass('is-valid')
+                            }
+                        }
+                    })
+            });
+
+
+            /**
+             * Historique
+             */
+
+            const historyContainerLength = historyContainer.querySelectorAll('tr').length;
+            if (historyContainerLength === 0) {
+                const info     = document.createElement("span");
+                info.innerText = 'Aucun élément trouvé';
+
+                historyContainer.innerHTML = '';
+                historyContainer.append(info);
+            } else {
+                historyContainer.querySelectorAll('a').forEach((el) => {
+                    el.innerText = moment(el.innerText).format("DD MMMM YYYY, HH[h]mm");
+                    el.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        $.ajax({
+                            url: '/api/blog/getHistory/' + e.currentTarget.id,
+                            success: (data) => {
+                                if (data) {
+                                    tinymce.get('editor').setContent(data.content);
+                                    if (data.img !== '')
+                                        imagePreview.setAttribute("src", data.img);
+                                    extractTextArea.innerText = data.extract;
+                                    slugInput.value           = data.slug;
+                                    titleInput.value          = data.title;
+
+                                }
+                            },
+                            error: (e) => {
+                                console.log(e);
+                            }
+                        })
+                    });
+                })
+            }
+
+            /**
+             * Form
+             */
+            const buttonSubmit = document.getElementById('submit');
+            buttonSubmit.addEventListener('click', function (e) {
+
+                const slugInput = document.getElementById("slug")
+                const titleInput = document.getElementById("title")
+                const editorAreaContent = tinymce.get("editor").getContent()
+                const imgData = document.getElementById("img-data")
+
+                $.ajax({
+                    url: '/api/blog/edit/{{ article.id }}',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        'title': titleInput.value,
+                        'slug': slugInput.value,
+                        'author_id': '{{ auth.user.id }}',
+                        'content': editorAreaContent,
+                        'state': stateSelector.value,
+                        'img_data': imgData.value,
+                    },
+                    success: (data) => {
+                        if (data.error) {
+                            let message = "";
+                            for (const [key, value] of Object.entries(data.message)){
+                                message = message + value + "<br>"
+                            }
+                            new bs5.Toast({
+                                body: message,
+                                className: 'border-0 bg-danger text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                        } else {
+                            new bs5.Toast({
+                                body: "L'article a bien été mis à jour. Vous allez être redirigé ...",
+                                className: 'border-0 bg-success text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                            setTimeout(function () {
+                                // window.location = "/admin/blogs";
+                            }, 3000)
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data)
+                    }
+                })
+            }, false)
+
+            function isFileImage(file) {
+                const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+
+                return file && acceptedImageTypes.includes(file['type']);
+            }
+
+        })
+        ;
+    </script>
+
+{% endblock %}

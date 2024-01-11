@@ -1,0 +1,348 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+
+    <section>
+
+        <ul class="container">
+
+            <div class="row bs-wizard d-none d-md-flex" style="border-bottom:0;">
+                <div class="col-md-3 bs-wizard-step">
+                    <div class="text-center bs-wizard-stepnum">Création du compte</div>
+                </div>
+                <div class="col-md-3 bs-wizard-step">
+                    <div class="text-center bs-wizard-stepnum">Vérification de l'email</div>
+                </div>
+                <div class="col-md-3 bs-wizard-step">
+                    <div class="text-center bs-wizard-stepnum">Paiement</div>
+                </div>
+                <div class="col-md-3 bs-wizard-step">
+                    <div class="text-center bs-wizard-stepnum">Finalisation</div>
+                </div>
+            </div>
+
+            <div class="position-relative">
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                    <div>
+                        <a href="#" class="progress-dot active"></a>
+                        <a href="#" class="progress-dot disabled"></a>
+                        <a href="#" class="progress-dot disabled"></a>
+                        <a href="#" class="progress-dot disabled"></a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="registerAlert"></div>
+
+            <div class="form-horizontal" id="multistep_form">
+                <fieldset id="informations">
+                    <form>
+                        <h4 class="d-flex flex-column flex-md-row">Etape 1 : Création de votre compte <a href="/login?redirect=https://dev.wogel123.fr/register" class="ms-md-auto my-auto already-registered">Déjà inscrit ?</a></h4>
+                        <br>
+                        <div class="form-group">
+                            <label class="control-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" id="registerUsername">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="registerPassword">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword">
+                        </div>
+                        <div class="d-flex">
+                            <input type="button" class="btn btn-dark btn-thin btn-upper btn-pad ms-auto mb-0" value="Etape suivante" id="next1">
+                        </div>
+                    </form>
+                </fieldset>
+                <fieldset id="email">
+                    <form class="d-flex flex-column">
+                        <h4>Etape 2 : Vérification de votre email</h4>
+                        <br>
+                        <p>Un code de vérification a été envoyé par email à l'adresse suivante : <i>(Pensez à vérifier vos spams)</i><br><b id="emailsend">{% if auth.logged %}{{ auth.user.email }}{% endif %}</b></p>
+                        <hr style="margin: 20px 0">
+                        <h4 class="text-center">Entrer le code de vérification pour continuer</h4>
+                        <div id="otp" class="inputs d-flex flex-row justify-content-center mt-2">
+                            <input class="m-2 text-center form-control rounded" type="text" id="first" maxlength="1" />
+                            <input class="m-2 text-center form-control rounded" type="text" id="second" maxlength="1" />
+                            <input class="m-2 text-center form-control rounded" type="text" id="third" maxlength="1" />
+                            <input class="m-2 text-center form-control rounded" type="text" id="fourth" maxlength="1" />
+                            <input class="m-2 text-center form-control rounded" type="text" id="fifth" maxlength="1" />
+                            <input class="m-2 text-center form-control rounded" type="text" id="sixth" maxlength="1" />
+                        </div>
+                        <span id="resendEmail" class="text-center">{% if auth.logged %}<a href="#" class="resend-email mx-auto" onclick="resendEmail('{{ auth.user.id }}')">Renvoyer un code</a>{% endif %}</span>
+                        <input type="button" class="btn btn-dark btn-thin btn-upper btn-pad ms-auto mb-0 me-auto me-lg-0 mt-4" value="Etape suivante" id="next2">
+                    </form>
+                </fieldset>
+                <fieldset id="payment">
+                    <h4>Etape 3 : Paiement</h4>
+                    <br>
+                    <div class="alert alert-secondary" role="alert">
+                        <h4 class="alert-heading">Attention</h4>
+                        <hr>
+                        <p>En vous abonnant à Na2sProno, vous vous engager à avoir lu et accepté les conditions générale de vente et le reglement de Na2sProno.
+                            Vous renoncez à votre droit de retractation et risquez des poursuites en cas de paiement frauduleux et litige.</p>
+                    </div>
+
+                    <div class="paypal-btn" id="paypal-button-container-P-44M81712WB870873GMITXNOI"></div>
+                    <script src="https://www.paypal.com/sdk/js?client-id=AaYTbZGApOv7qz-pzHwQyKP90Im947ma6KQRlNftdD2-AEJ5cUOL7u1d-8QYPVean8rWnsrfKcq0maxK&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+                    <script>
+                        paypal.Buttons({
+                            style: {
+                                shape: 'pill',
+                                color: 'blue',
+                                layout: 'vertical',
+                                label: 'subscribe'
+                            },
+                            createSubscription: function(data, actions) {
+                                return actions.subscription.create({
+                                    /* Creates the subscription */
+                                    plan_id: 'P-44M81712WB870873GMITXNOI'
+                                });
+                            },
+                            onApprove: function(data) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/api/subscription/createSubscription",
+                                    data: {
+                                        "userid": userid,
+                                        "subscriptionid": data.subscriptionID
+                                    },
+                                    dataType: "JSON"
+                                })
+
+                                $('.progress-dot:nth-child(4)').addClass('active').removeClass('disabled')
+                                $(".progress-bar").css("width","100%")
+                                $('#registerAlert').html("<div id='registerAlert'></div>")
+                                $('#informations').hide()
+                                $('#email').hide()
+                                $('#payment').hide()
+                                $('#success').show()
+                            }
+                        }).render('#paypal-button-container-P-44M81712WB870873GMITXNOI'); // Renders the PayPal button
+                    </script>
+
+                </fieldset>
+                <fieldset id="success">
+                    <h4>Etape 4 : Finalisation</h4>
+                    <br>
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">Félicitation !</h4>
+                        <hr>
+                        <p>Bravo tu fais enfin partie de l'équipe ! Merci de ta confiance et commence dès maintenant à jouer avec nous en te rendant sur
+                            <a href="/daily-prono">la pages des pronostiques</a>
+                            afin de vivre l'aventure du foot avec au sein de notre communauté :)</p>
+                        <br>
+                        <p>Tu peux gérer tous les paramètres relatifs à ton compte et tes abonnements directement via ton profil. N'hésite pas à nous contacter
+                            en cas de problème ;)</p>
+                    </div>
+                </fieldset>
+            </div>
+
+        </div>
+    </section>
+    <style>
+        @media (max-width: 768px) {
+            .already-registered {
+                line-height: 36px;
+            }
+        }
+        @media (max-width: 400px) {
+            .inputs input {
+                width: 25px;
+                height: 40px;
+                padding: 0;
+            }
+        }
+    </style>
+    <script>
+
+        let logged, subscribed, verified, userid
+        {% if auth.logged %}
+        logged = true
+        userid = '{{ auth.user.id }}'
+        {% if auth.user.verified %}
+        verified = true
+        {% endif %}
+        {% if auth.subscribed %}
+        subscribed = true
+        {% endif %}
+        {% endif %}
+
+
+        $(document).ready(function (){
+            "use strict";
+
+            if (window.location.href.includes('register')) {
+                if (logged && subscribed) {
+                    setProgressBar(3)
+                    $('#informations').hide()
+                    $('#email').hide()
+                    $('#payment').hide()
+                    $('#success').show()
+                } else if (logged && verified) {
+                    setProgressBar(2)
+                    $('#informations').hide()
+                    $('#email').hide()
+                    $('#payment').show()
+                    $('#success').hide()
+                } else if (logged && !verified) {
+                    setProgressBar(1)
+                    $('#informations').hide()
+                    $('#email').show()
+                    $('#payment').hide()
+                    $('#success').hide()
+                }
+            }
+
+            $('#next1').click(function (){
+
+                let username        = $("#registerUsername").val(),
+                    email           = $("#registerEmail").val(),
+                    password        = $('#registerPassword').val(),
+                    passwordConfirm = $('#registerConfirmPassword').val()
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/auth/createAccount",
+                    data: {
+                        "username": username,
+                        "email": email,
+                        "password": password,
+                        "passwordConfirm": passwordConfirm
+                    },
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.error) {
+                            let message = "";
+                            for (const [key, value] of Object.entries(data.message)){
+                                message = message + value + "<br>"
+                            }
+                            $('#registerAlert').html("<div class='alert alert-danger'>" + message + "</div>")
+                        } else {
+                            setProgressBar(1)
+                            $('#emailsend').html("<b>" + data.email + "</b>")
+                            userid = data.userid
+                            $('#registerAlert').html("<div id='registerAlert'></div>")
+                            $('#informations').hide()
+                            $('#email').show()
+                            $('#payment').hide()
+                            $('#success').hide()
+                            $('#resendEmail').html('<a href="#" class="resend-email mx-auto" onclick="resendEmail(\''+data.userid+'\')">Renvoyer un code</a>')
+                        }
+                    },
+                    error: function () {
+                        $('#registerAlert').html("<div class='alert alert-danger'>Ce nom d'utilisateur ou cette adresse email est déjà utilisée</div>")
+                    },
+                    beforeSend: function () {
+                        $('#registerAlert').html("<div class='alert alert-secondary'>Requête en cours de traitement <img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div>")
+                    }
+
+                })
+
+            })
+
+            $('#next2').click(function () {
+                let first   = $('#first').val(),
+                    second  = $('#second').val(),
+                    third   = $('#third').val(),
+                    fourth  = $('#fourth').val(),
+                    fifth   = $('#fifth').val(),
+                    sixth   = $('#sixth').val()
+
+                let code = first + second + third + fourth + fifth + sixth
+
+                $.ajax({
+                    type: "POST",
+                    url: "/api/auth/verifyAccount",
+                    data: {
+                        "code": code,
+                        "userid": userid
+                    },
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.error) {
+                            console.log(data)
+                            let message = "";
+                            for (const [key, value] of Object.entries(data.message)){
+                                message = message + value + "<br>"
+                            }
+                            $('#registerAlert').html("<div class='alert alert-danger'>" + message + "</div>")
+                        } else {
+                            setProgressBar(2)
+                            $('#registerAlert').html("<div id='registerAlert'></div>")
+                            $('#informations').hide()
+                            $('#email').hide()
+                            $('#payment').show()
+                            $('#success').hide()
+                            verify_alert.hide()
+                        }
+                    },
+                    error: function (e) {
+                        console.log(e)
+                    },
+                    beforeSend: function () {
+                        $('#registerAlert').html("<div class='alert alert-secondary'>Requête en cours de traitement <img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div>")
+                    }
+
+                })
+
+            })
+
+            function setProgressBar(curStep){
+                if (curStep >= 1) {
+                    $('.progress-dot:nth-child(2)').addClass('active').removeClass('disabled')
+                } else {
+                    $('.progress-dot:nth-child(2)').addClass('disabled').removeClass('active')
+                }
+                if (curStep >= 2) {
+                    $('.progress-dot:nth-child(3)').addClass('active').removeClass('disabled')
+                } else {
+                    $('.progress-dot:nth-child(3)').addClass('disabled').removeClass('active')
+                }
+                if (curStep >= 3) {
+                    $('.progress-dot:nth-child(4)').addClass('active').removeClass('disabled')
+                } else {
+                    $('.progress-dot:nth-child(4)').addClass('disabled').removeClass('active')
+                }
+                var percent = parseFloat(100 / 3) * curStep;
+                percent = percent.toFixed();
+                $(".progress-bar")
+                    .css("width",percent+"%")
+            }
+
+        });
+
+
+
+        function resendEmail(id) {
+            $.ajax({
+                type: "POST",
+                url: "/api/auth/resendVerification",
+                data: {
+                    "userid": id
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    $('#registerAlert').html('<div class="alert alert-secondary">'+data.message+'</div>')
+                    $('#resendEmail').html('<p class="resend-email">Vous pourrez redemander un code <br>dans 60 secondes <i class="ms-2 fa-solid fa-spinner fa-spin-pulse"></i></p>')
+                    setTimeout(function() {
+                        $('#resendEmail').html('<a href="#" class="resend-email mx-auto" onclick="resendEmail(\'{{ auth.user.id }}\')">Renvoyer un code</a>')
+                    },60000)
+                },
+                beforeSend: function () {
+                    $('#registerAlert').html("<div class='alert alert-secondary'>Requête en cours de traitement <img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div>")
+                }
+
+            })
+        }
+    </script>
+
+{% endblock %}

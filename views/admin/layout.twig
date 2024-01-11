@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>NA2S PRONO</title>
+
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/main.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700&display=swap">
+    <link rel="stylesheet" href="/assets/css/bootstrap-datetimepicker.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.11.5/b-2.2.2/b-colvis-2.2.2/cr-1.5.5/date-1.1.2/r-2.2.9/rr-1.2.8/datatables.min.css"/>
+
+
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/toast.min.js"></script>
+    <script src="/assets/js/bootstrap-datetimepicker.js"></script>
+    <script src="/assets/js/locales/bootstrap-datetimepicker.fr.js"></script>
+    <script src="https://cdn.datatables.net/v/dt/dt-1.11.5/b-2.2.2/b-colvis-2.2.2/cr-1.5.5/date-1.1.2/r-2.2.9/rr-1.2.8/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a href="/" class="navbar-brand">
+                <img src="/assets/img/logo.png">
+                <div class="m-auto">
+                    <h4>Na2sProno</h4>
+                    <p>Pronostiqueur français</p>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" style="height: 90px;" id="navbar">
+
+                <div class="d-flex flex-column mx-auto">
+                    <h3 class="text-uppercase fw-bold mb-2">Espace administrateur</h3>
+                    <a href="/" class="btn btn-success btn-upper btn-sm btn-thin mx-auto" style="width: fit-content">Retour au site <i class="fa-solid fa-right-from-bracket ms-2"></i></a>
+                </div>
+
+                <div class="d-flex user-login ms-auto">
+                    <img src="/assets/img/user.png">
+                    <div class="d-flex flex-column">
+                        <p>{{ auth.user.username }}</p>
+                        <small>Administrateur</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+</header>
+
+
+<div class="container mb-5">
+    <section>
+{#        <div class="row mb-5">#}
+{#            <div class="col-md-2 d-flex">#}
+{#                <a href="/admin/" class="btn btn-success btn-upper btn-pad btn-thin btn-shadow mx-auto">Stats</a>#}
+{#            </div>#}
+{#            <div class="col-md-3 d-flex">#}
+{#                <a href="/admin/pronos/" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Tickets</a>#}
+{#            </div>#}
+{#            <div class="col-md-3 d-flex">#}
+{#                <a href="/admin/members" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Membres</a>#}
+{#            </div>#}
+{#            <div class="col-md-3 d-flex">#}
+{#                <a href="/admin/blogs" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Articles</a>#}
+{#            </div>#}
+{#            <div class="col-md-3 d-flex">#}
+{#                <a href="/admin/subscriptions" class="btn btn-light btn-upper btn-pad btn-thin btn-shadow mx-auto">Abonnements</a>#}
+{#            </div>#}
+{#        </div>#}
+
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-md">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a href="/admin/" class="nav-link" id="adminStats">Stats</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/pronos/" class="nav-link" id="adminPronos">Tickets</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/members" class="nav-link" id="adminMembers">Membres</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/blog/" class="nav-link" id="adminBlogs">Articles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/subscriptions" class="nav-link" id="adminSubscriptions">Abonnement</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <hr>
+        {% block content %}{% endblock %}
+    </section>
+</div>
+
+<footer class="mt-auto">
+    <div class="container d-flex">
+        <p>Tous droits réservés © 2022 <span>Na2sProno</span></p>
+        <p class="ms-auto">Développé par <a href="https://wogel123.fr">wogel123</a></p>
+    </div>
+</footer>
+
+</body>
+</html>

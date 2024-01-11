@@ -1,0 +1,147 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 3 %}
+{% block content %}
+
+    <div class="d-flex flex-column">
+        <h4 class="title mt-4 text-center fw-bold">Rédaction d'un nouveau ticket</h4>
+
+        <div class="d-flex mt-5">
+            <div class="input-group mb-3 me-3">
+                <span class="input-group-text" style="font-size: 12px">Cote</span>
+                <input type="text" class="form-control text-center" id="odd" style="font-size: 12px" placeholder="Cote totale du ticket">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" style="font-size: 12px">Type</span>
+                <input type="text" class="form-control text-center" id="type" style="font-size: 12px" placeholder="Type de ticket">
+            </div>
+        </div>
+
+        <button id="addMatch" class="mx-auto btn btn-primary btn-thin btn-upper btn-sm btn-pad mt-3" onclick="addMatch()" style="width: fit-content">Ajouter un match</button>
+
+        <div id="matchList">
+            <div class="card d-none" id="matchTemplate">
+                <div class="card-body">
+                    <div class="form-group d-flex flex-column">
+                        <button class="btn btn-danger btn-sm btn-thin btn-pad mx-auto mb-2 mx-auto" onclick="$(this).parent().parent().parent().remove()">Supprimer le match</button>
+                        <div class="input-group">
+                            <input type="text" class="form-control text-center" placeholder="Equipe 1" id="team1" style="font-size: 12px" >
+                            <span class="input-group-text" style="font-size: 12px" >VS</span>
+                            <input type="text" class="form-control text-center" placeholder="Equipe 2" id="team2" style="font-size: 12px" >
+                        </div>
+                        <div class="input-group w-25 mt-2 mx-auto">
+                            <input type="text" class="form-control text-center" placeholder="Date et heure du match" id="time" style="font-size: 12px">
+                        </div>
+
+                        <p style="font-size: 20px" class="text-center fw-bold mt-3 mb-2">Pronostique(s)</p>
+
+                        <div id="pronoList" class="d-flex flex-column">
+                            <button class="mx-auto btn btn-primary btn-thin btn-upper btn-sm" id="addProno" onclick="addProno($(this).parent())">Ajouter un pronostic</button>
+                            <div id="pronoTemplate" class="d-none col-md-6 mx-auto">
+                                <div class="d-flex flex-column">
+                                    <hr>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" style="font-size: 12px">Type de pronostic</span>
+                                        <input type="text" class="form-control" style="font-size: 12px" id="pronotype">
+                                    </div>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" style="font-size: 12px">Pronostic</span>
+                                        <input type="text" class="form-control" style="font-size: 12px" id="pronoprono">
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text" style="font-size: 12px">Cote</span>
+                                        <input type="text" class="form-control" style="font-size: 12px" id="pronoodd">
+                                    </div>
+                                    <button class="btn btn-danger btn-sm btn-thin btn-pad mx-auto mt-4" onclick="$(this).parent().parent().remove()">Supprimer le pronostic</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-success btn-pad btn-thin btn-upper btn-pad mx-auto mt-5" style="width: fit-content;" id="sendProno">Envoyer</button>
+
+    </div>
+
+    <script>
+
+    function addMatch() {
+        let matchList = $('#matchList');
+        let template = $('#matchTemplate')
+            .clone()
+            .removeAttr('id')
+            .addClass('endLine')
+            .removeClass('d-none');
+        matchList.append(template)
+
+        let datePicker = template.find('#time')
+
+        datePicker.datetimepicker({
+            autoclose: true,
+            language: "fr",
+            todayHighlight: true,
+            format: 'dd/mm/yyyy hh:ii'
+        });
+
+    }
+
+    function addProno(id) {
+        let template = $('#pronoTemplate')
+            .clone()
+            .removeAttr('id')
+            .addClass('endLine2')
+            .removeClass('d-none');
+        id.append(template)
+    }
+
+    $('#sendProno').click(function () {
+        let matchData = [],
+            odd = $('#odd').val(),
+            type = $('#type').val();
+
+        $('.endLine').each(function (index, element) {
+            let row = $(element);
+            if (row.attr('id') === 'matchTemplate') return;
+            let pronoData = [];
+            $('.endLine2', element).each(function (index, element) {
+                let row = $(element);
+                if (row.attr('id') === 'pronoTemplate') return;
+                let result = {
+                    type: row.find('#pronotype').val(),
+                    prono: row.find('#pronoprono').val(),
+                    odd: row.find('#pronoodd').val(),
+                }
+                pronoData.push(result)
+            })
+            let result = {
+                team1: row.find('#team1').val(),
+                team2: row.find('#team2').val(),
+                time: row.find('#time').val(),
+                prono: pronoData
+            }
+            matchData.push(result)
+        })
+
+        $.ajax({
+            type: "POST",
+            url: "/api/prono/submitProno",
+            data: {
+                "matchData": matchData,
+                "odd": odd,
+                "type": type
+            },
+            dataType: "JSON",
+            success: function () {
+                window.location = "/admin/pronos/list"
+            }
+        })
+
+    })
+
+    addMatch()
+
+</script>
+
+{% endblock %}

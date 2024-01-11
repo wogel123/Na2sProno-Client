@@ -1,0 +1,149 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-1.11.5/b-2.2.2/b-colvis-2.2.2/cr-1.5.5/date-1.1.2/r-2.2.9/rr-1.2.8/datatables.min.css"/>
+
+    <section>
+        <div class="row">
+            <div class="col-md-12 d-flex flex-column">
+                <h4 class="title mb-4">Pronostiques passés : (5)</h4>
+
+                <table id="table-sortable" class="display" style="width:100%;min-width: 800px;">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Match(s)</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                </table>
+
+                <a href="/daily-prono" class="btn btn-success btn-pad btn-thin btn-upper mx-auto mt-4" style="width: fit-content">Retourner aux pronos du jour</a>
+
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .dataTables_length {
+            margin-top: 5px;
+        }
+        .dataTables_filter {
+            margin-bottom: 15px;
+        }
+        .dataTable {
+            width: 100%;
+            background: #f8f9fa;
+            margin-bottom: 10px !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 2px !important;
+            padding: 2px 10px !important;
+        }
+        table.dataTable.no-footer {
+            border-collapse: collapse !important;
+            border-bottom: none !important;
+        }
+        .dataTable tbody {
+            border-top: 2px solid #212529 !important;
+        }
+        table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+            background-color: #ebeced;
+        }
+        table.dataTable tbody tr {
+            background-color: #f8f9fa;
+        }
+
+    </style>
+    <script src="https://cdn.datatables.net/v/dt/dt-1.11.5/b-2.2.2/b-colvis-2.2.2/cr-1.5.5/date-1.1.2/r-2.2.9/rr-1.2.8/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script>
+
+        $(document).ready(function() {
+            var table = $('#table-sortable').DataTable({
+                serverSide: true,
+                autoWidth: true,
+                pageLength: 10,
+                ordering: false,
+                searching: false,
+                scrollX: true,
+                columns: [
+                    {
+                        data: {'id' : 'id', 'created_at' : 'created_at'},
+                        render: function (data, type, row) {
+                            return '<div class="t-id fw-bold">#' + data.id + '<br><span>' + moment(data.created_at).format('DD/MM/YYYY') + '</span></div>';
+
+                        }
+                    },
+                    {
+                        data: 'match',
+                        render: function (data, type, row) {
+
+                            let div = ""
+
+                            data.forEach(element => {
+                                div = div + '<div class="text-center t-match">' + element.team1 + '<span style="font-weight: bold"> VS </span>' + element.team2 + '</div>';
+                            })
+
+                            return div;
+
+                        }
+                    },
+                    {
+                        data: 'type',
+                        render: function (data, type, row) {
+                            return '<span class="label" style="font-size: 12px">' + data + '</span>';
+
+                        }
+                    },
+                    {
+                        data: 'state',
+                        render: function (data, type, row) {
+
+                            if (data === 2) {
+                                return '<span class="label bg-warning" style="font-size: 12px">En attente</span>';
+                            } else if (data === 0) {
+                                return '<span class="label bg-danger" style="font-size: 12px">Perdu</span>';
+                            } else {
+                                return '<span class="label bg-success" style="font-size: 12px">Validé</span>';
+                            }
+
+                        }
+                    },
+                    {
+                        data: 'id',
+                        render: function (data, type, row) {
+                            return '<div class="t-see"><a href="/prono/'+data+'">Voir le ticket</a></div>';
+                        }
+                    }
+                ],
+                columnDefs: [
+                    {"name": "id", "name": "created_at", "width": "10%",  "targets": 0},
+                    {"name": "match", "targets": 1},
+                    {"name": "type",  "width": "15%", "targets": 2},
+                    {"name": "state",  "width": "15%", "targets": 3},
+                    {"name": "id",  "width": "15%",  "targets": 4}
+                ],
+                ajax: {
+                    url: '/api/prono/listProno',
+                    type: 'post'
+                },
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json'
+                },
+                buttons: [
+                    {
+                        extend: 'pageLength',
+                        text: 'Éléments par page',
+                    }
+                ],
+            });
+        });
+
+
+    </script>
+
+{% endblock %}

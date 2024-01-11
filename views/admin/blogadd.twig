@@ -1,0 +1,125 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 5 %}
+{% block content %}
+
+    <div class="d-flex flex-column">
+            <h4 class="title mt-4 text-center fw-bold">Redaction d'un article</h4>
+
+            <div class="d-flex mt-5 flex-column col-md-6 mx-auto">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Titre</span>
+                    <input type="text" class="form-control text-center" id="title" style="font-size: 12px" placeholder="Titre">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" style="font-size: 12px">Slug / URL</span>
+                    <input type="text" class="form-control text-center" id="slug" style="font-size: 12px" placeholder="Slug / URL">
+                </div>
+                <div id="illustration" class="d-flex flex-column">
+                    <input class="form-control form-control-sm label-file img-file-info" data-image="illustration" name="img-file" id="img-file" type="file" style="font-size: 12px; line-height: 23px">
+                    <img src="" alt="" class="img-file label-file mt-3" style="width: 100%;height: 300px">
+                    <input type="hidden" id="img-data">
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="input-group mt-3">
+                    <textarea name="content" class="ckeditor" id="editor"></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-success btn-pad btn-thin btn-upper btn-pad mx-auto mt-5" style="width: fit-content;" type="submit" id="submit">Envoyer</button>
+
+        </div>
+
+    <style>
+        .input-group-text {
+            width: 107px;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+    <script src="https://cdn.tiny.cloud/1/hnte9och4tbpba1pyvs1x04uic56zrfex0ie3wnq4k7kcwma/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="/assets/js/datepicker/bootstrap-datepicker.js"></script>
+
+    <script type="text/javascript">
+            $(document).ready(function () {
+                tinymce.init({
+                    selector: "textarea#editor",
+                    height: 550,
+                    width: '100%',
+                    language: 'fr_FR',
+                    plugins: "fullscreen code image link",
+                    toolbar: "fullscreen fontselect fontsizeselect bold italic underline strikethrough link image forecolor backcolor alignleft aligncenter alignright alignjustify cut copy paste bullist numlist outdent indent blockquote code"
+                });
+
+                function isFileImage(file) {
+                    const acceptedImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+
+                    return file && acceptedImageTypes.includes(file['type']);
+                }
+
+
+                const illustrationContainer = document.getElementById('illustration');
+                const imageInput = illustrationContainer.querySelector("#img-file");
+                const imagePreview = illustrationContainer.querySelector(".img-file");
+                const imagePreviewInfo = illustrationContainer.querySelector(".img-file-info");
+                const imageData = illustrationContainer.querySelector("#img-data");
+                const buttonSubmit = document.getElementById('submit');
+
+
+                imageInput.addEventListener('change', function (e) {
+                    e.preventDefault();
+                    const file = this.files[0];
+                    if (file && isFileImage(file)) {
+                        const reader = new FileReader();
+
+                        imagePreviewInfo.innerText = file.name;
+
+                        reader.addEventListener("load", function () {
+                            imagePreview.setAttribute("src", this.result)
+                            imageData.value = this.result
+                        });
+
+                        reader.readAsDataURL(file);
+
+                    } else {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // todo message
+                    }
+                });
+
+                buttonSubmit.addEventListener('click', function (e) {
+
+                    const slugInput = document.getElementById("slug")
+                    const titleInput = document.getElementById("title")
+                    const editorAreaContent = tinymce.get("editor").getContent()
+                    const imgData = document.getElementById("img-data")
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/blog/add',
+                        data: {
+                            'title': titleInput.value,
+                            'slug': slugInput.value,
+                            'author_id': '{{ auth.user.id }}',
+                            'content': editorAreaContent,
+                            'img_data': imgData.value,
+                        },
+                        dataType: 'JSON',
+                        success: (data) => {
+                            window.location = '/admin/blogs'
+                        },
+                        error: (data) => {
+                            new bs5.Toast({
+                                body: 'Ce slug est déjà utilisé',
+                                className: 'border-0 bg-danger text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();                        }
+                    })
+                }, false)
+            });
+        </script>
+
+{% endblock %}

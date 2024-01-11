@@ -1,0 +1,140 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+
+    <section>
+        <div class="row">
+            <div class="col-md-6 d-flex flex-column">
+                <img src="/assets/img/soccer-player.png" class="social-img">
+                <p class="social">
+                    Retrouve-nous sur nos différents réseaux sociaux et suis avec nous à l'aventure sportive du moment ! Rejoins notre communauté de passionnés et interagis via nos réseaux sociaux !
+                </p>
+                <div class="d-flex flex-column social-btn">
+                    <div class="social-btns mx-auto mt-3">
+                        <a class="btn snapchat" href="#">
+                            <i class="fa-brands fa-snapchat"></i>
+                        </a>
+                        <a class="btn twitter" href="#">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                        <a class="btn instagram" href="#">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mt-5 mt-md-0">
+                <h4 class="title text-center">Nous contacter</h4>
+                <form class="contact d-flex flex-column mt-4">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" id="validationTextarea" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-pad btn-upper btn-square mx-auto mt-2">Envoyer</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .social-img {
+            width: 200px;
+            margin: 15px auto;
+        }
+        .social {
+            margin-top: 16px;
+            text-align: center;
+            font-weight: 100;
+            color: gray;
+        }
+        .contact label {
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #9c9a9a;
+            font-style: italic;
+            font-size: 12px;
+        }
+        .social-btns .btn,
+        .social-btns .btn:before,
+        .social-btns .btn i {
+            transition: all 0.35s;
+            transition-timing-function: cubic-bezier(0.31, -0.105, 0.43, 1.59);
+        }
+        .social-btns .btn:before {
+            top: 90%;
+            left: -110%;
+        }
+        .social-btns .btn i {
+            transform: scale(0.8);
+        }
+        .social-btns .btn.twitter:before {
+            background-color: #3cf;
+        }
+        .social-btns .btn.twitter i {
+            color: #3cf;
+        }
+        .social-btns .btn.instagram:before {
+            background-color: #C13584;
+        }
+        .social-btns .btn.instagram i {
+            color: #C13584;
+        }
+        .social-btns .btn.snapchat:before {
+            background-color: #FFFC00;
+        }
+        .social-btns .btn.snapchat i {
+            color: #FFFC00;
+        }
+        .social-btns .btn:focus:before,
+        .social-btns .btn:hover:before {
+            top: -10%;
+            left: -10%;
+        }
+        .social-btns .btn:focus i,
+        .social-btns .btn:hover i {
+            color: #fff;
+            transform: scale(1);
+        }
+        .social-btns {
+            text-align: center;
+            display: flex;
+        }
+        .social-btns .btn {
+            display: flex;
+            background-color: #fff;
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            margin: 0 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 28%;
+            box-shadow: 0px 0px 20px 5px rgb(0 0 0 / 10%);
+            opacity: 0.99;
+        }
+        .social-btns .btn:before {
+            content: '';
+            width: 120%;
+            height: 120%;
+            position: absolute;
+            transform: rotate(45deg);
+        }
+        .social-btns .btn i {
+            font-size: 38px;
+            vertical-align: middle;
+            margin: auto;
+        }
+
+
+    </style>
+{% endblock %}

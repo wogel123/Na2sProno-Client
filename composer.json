@@ -1,0 +1,30 @@
+{
+    "name": "kylianpetrequin/na2sprono",
+    "authors": [
+        {
+            "name": "Kylian PETREQUIN",
+            "email": "contact@wogel123.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    },
+    "require": {
+        "slim/slim": "^4.9",
+        "twig/twig": "^3.3",
+        "slim/twig-view": "^3.3",
+        "php-di/php-di": "^6.3",
+        "illuminate/database": "^8.83",
+        "vlucas/valitron": "^1.4",
+        "selective/config": "^1.1",
+        "slim/psr7": "^1.5",
+        "slim/http": "^1.2",
+        "twig/extra-bundle": "^3.3",
+        "twig/intl-extra": "^3.3",
+        "cocur/slugify": "^4.1",
+        "noweh/twitter-api-v2-php": "^3.1"
+
+    }
+}

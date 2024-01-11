@@ -1,0 +1,15 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 3 %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-xl-6 d-flex">
+            <a href="/admin/blog/add" class="mx-auto btn btn-info btn-thin btn-pad btn-square btn-shadow btn-lg btn-upper mt-4">Rédiger un article</a>
+        </div>
+        <div class="col-xl-6 d-flex">
+            <a href="/admin/blogs" class="mx-auto btn btn-info btn-thin btn-pad btn-square btn-shadow btn-lg btn-upper mt-4">Voir tous les articles</a>
+        </div>
+    </div>
+
+{% endblock %}

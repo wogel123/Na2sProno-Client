@@ -1,0 +1,107 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+
+    <section>
+        <div class="daily-prono">
+            <h4 class="title mb-4">Pronostique(s) du jour : ({{ tickets|length }})</h4>
+
+            {% if auth.subscribed %}
+
+                {% if not tickets|length == 0 %}
+
+                   {% for ticket in tickets %}
+
+                       <ul class="matchs">
+                        <li class="ticket-info">
+                            <p class="id">Prono <span>#{{ ticket.id }}</span></p>
+                            <p class="posted">Posté le <span>{{ match.time|date('d/m/Y') }}</span> à <span>{{ match.time|date('H:i') }}</span></p>
+                            <div>
+                                <p class="type">Type : <span class="label">{{ ticket.type }}</span></p>
+                                <p class="odds">Cote totale : <span class="label">{{ ticket.odd }}</span></p>
+                            </div>
+                        </li>
+                           <br>
+                        <div class="alert alert-primary" role="alert">
+                            <h4 class="alert-heading text-center">Simulateur de gain</h4>
+                            <hr>
+                            <div class="simalator-mise">
+                                <button type="button" class="btn btn-primary">-</button>
+                                <input type="text" class="form-control" value="2.50">
+                                <button type="button" class="btn btn-primary">+</button>
+                            </div>
+                            <div class="simulator-wins">
+                                <span>Gains</span>
+                                <p>24.00€</p>
+                            </div>
+                        </div>
+                        <hr style="margin: 20px 0">
+                        <div class="pronomatchlist">
+                            {% for match in ticket.match %}
+                                <li class="match">
+                                    <div class="info">
+                                        <p class="date">Match le : <span>{{ match.time|date('d/m/Y') }}</span> à <span>{{ match.time|date('H:i') }}</span></p>
+                                    </div>
+                                    <div class="teams">
+                                        <div class="one">
+                                            {#                            <img src="/assets/img/flags/countries/Corée.png">#}
+                                            <small>{{ match.team1 }}</small>
+                                        </div>
+                                        <span>VS</span>
+                                        <div class="two">
+                                            <small>{{ match.team2 }}</small>
+                                            {#                            <img src="/assets/img/flags/countries/Brézil.png">#}
+                                        </div>
+                                    </div>
+                                    <div class="prono">
+                                        <h3>Pronostique de ce match :</h3>
+
+                                        {% for prono in match.prono %}
+
+                                            <div class="prono-info">
+                                                <span class="label">{{ prono.type }}</span>
+                                                <p class="result">{{ prono.prono }}</p>
+                                                <p class="odds">Cote : <span class="label">{{ prono.odd }}</span></p>
+                                            </div>
+
+                                        {% endfor %}
+                                    </div>
+                                    <i class="fa-solid fa-plus match-add mt-4"></i>
+                                </li>
+                            {% endfor %}
+                        </div>
+                    </ul>
+
+                {% endfor %}
+
+                {% else %}
+
+                    <div class="alert alert-secondary mt-5 text-center" role="alert">
+                        <h4 class="alert-heading">Information</h4>
+                        <hr>
+                        <p>Aucun pronostics n'a encore été posté aujourd'hui. Vous pouvez consulter <a href="/archive" class="alert-link">les pronostics passés</a> ou attendre les prochains pronostics.</p>
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="alert alert-danger mt-5 text-center" role="alert">
+                    <h4 class="alert-heading">Attention</h4>
+                    <p>Vous devez être membre et abonné VIP pour accéder aux pronostics journaliers. Vous pouvez vous rendre dans <a href="/archive" class="alert-link">les pronostics passés</a> ou vous abonner afin de pouvoir suivre les pronostics du jour.</p>
+                    <hr>
+                    <a href="/register" class="btn btn-warning btn-upper btn-thin btn-pad mx-auto">Je m'abonne</a>
+                </div>
+
+            {% endif %}
+        </div>
+        <hr style="margin: 50px 0">
+        <div class="passed-prono d-flex flex-column">
+            <h4 class="title text-center">Pronostiques passés</h4>
+            <a href="/archive" class="btn btn-warning btn-thin btn-upper mx-auto mt-4">Accéder aux archives ici</a>
+        </div>
+    </section>
+
+
+{% endblock %}

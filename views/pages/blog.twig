@@ -1,0 +1,216 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+    <link rel="stylesheet" href="/assets/css/jquery-comments.css"/>
+
+    <section>
+        <div class="col-md-12">
+            <div class="article-page-title" style="line-height: 70px;">
+                <div style="text-align: center;">
+                    <b style="font-weight: 800;">{{ article.title }}</b>
+                    <div class="article-page-title-divider mx-auto"></div>
+                    Posté le {{ article.created_at | date('d/m/Y à H:i') }}, par
+                    <i>{{ article.author.username }}</i>
+                </div>
+            </div>
+            <div class="article-page-article">
+                <div class="article-page-image">
+                    <img src="{{article.img}}" />
+                </div>
+                <div class="article-page-content">
+
+                    {{ article.content | raw }}
+
+                    <div class="article-page-content-footer">
+                        <div class="d-flex justify-content-between article-page-content-footer-text">
+                            <div class="d-flex">
+                                <p style="font-weight: 400;" class="text-center">Article rédigé par </p>
+                                <span class="label bg-danger mx-2" style="font-size: 12px">Administrateur</span>
+                                <p style="font-weight: 800;" class="ms-1"> {{ article.author.username }}</p>
+                            </div>
+                            <div>
+                                Posté le {{ article.created_at | date('d/m/Y à H:i') }}
+                            </div>
+                        </div>
+                        <div style="text-align: center;    padding-top: 20px;">
+                            <div class="article-page-subtitle">
+                                <b style="font-weight: 600;">Partages l'article !</b>
+                            </div>
+                            <div class="article-page-share">
+                                <a class="article-twitter" href="" title="">
+                                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                                </a>
+                                <a class="article-forum" href="" title="">
+                                    <i class="far fa-newspaper" aria-hidden="true"></i>
+                                </a>
+                                <a class="article-mail" href="" title="">
+                                    <i class="far fa-envelope" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-md-flex">
+            <div class="col-md-12 col-12">
+                <div class="article-page-comment-content">
+                    <div class="article-page-subtitle">Commentaires <span id="commentsCount"></span></div>
+                    {% if not auth.logged %}
+                    <div class="alert alert-danger">Vous devez être connecté pour poster un commentaire</div>
+                    {% endif %}
+                    <div id="comments-container" class="jquery-comments">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <style>
+        .jquery-comments .textarea-wrapper .control-row > span {
+            border-radius: 25px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            font-weight: 100;
+            border: 0;
+        }
+        .jquery-comments .textarea-wrapper .control-row > span:hover {
+            border: 0;
+        }
+        .article-page-content-footer-text div {
+            font-size: 12px;
+            margin: auto;
+        }
+        .article-page-content-footer-text span {
+            display: none;
+        }
+        .article-page-content-footer-text {
+            flex-direction: column;
+        }
+    </style>
+    <script src="/assets/js/jquery-comments.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+    <script type="text/javascript">
+
+
+        // Moment
+        moment.locale('fr');
+        moment.updateLocale('fr', {
+            relativeTime: {
+                s: '%d secondes'
+            }
+        });
+
+        moment.fn.fromNowOrNow = function (a) {
+            if (Math.abs(moment().diff(this)) < 1000) { // 1000 milliseconds
+                return 'maintenant';
+            }
+            return this.fromNow(a);
+        };
+
+        const $commentContainer = $('#comments-container');
+        const $commentCount     = $('#commentsCount');
+
+        let commentCount = 0;
+
+        $commentContainer.comments({
+            profilePictureURL: '/assets/img/user.png',
+            postCommentOnEnter: true,
+            enableEditing: false,
+            enableDeletingCommentWithReplies: true,
+            enableReplying: true,
+            textareaPlaceholderText: 'Laisser un commentaire',
+            sendText: 'Commenter',
+            replyText: 'Répondre',
+            editText: 'Modifier',
+            editedText: 'Modifié',
+            deleteText: 'Supprimer',
+            popularText: 'Populaire',
+            oldestText: 'Ancien',
+            newestText: 'Récent',
+            viewAllRepliesText: 'Voir les __replyCount__ réponses',
+            hideRepliesText: 'Cacher les réponses',
+            noCommentsText: 'Aucun commentaire',
+            highlightColor: '#2980b9',
+
+            {% if auth.user.is_admin %}
+            currentUserIsAdmin: true,
+            {% endif %}
+
+            currentUserId: '{{ auth.user.id }}',
+            timeFormatter: function (time) {
+                return moment(time).fromNow();
+            },
+            textFormatter: function (text) {
+                return text;
+            },
+            getComments: function (success, error) {
+                $.ajax({
+                    type: 'get',
+                    url: '/api/blog/getComments/{{ article.id }}',
+                    success: function (data) {
+                        success(data);
+
+                        commentCount = data.length;
+                        $commentCount.html("(" + commentCount + ")");
+                    },
+                    error: error
+                });
+            },
+            postComment: function (commentJSON, success, error) {
+                $.ajax({
+                    type: 'post',
+                    url: '/api/blog/postComment/{{ article.id }}',
+                    data: commentJSON,
+                    success: function (comment) {
+                        success(comment);
+
+                        commentCount++;
+                        $commentCount.html("(" + commentCount + ")");
+                    },
+                    error: error
+                });
+            },
+            deleteComment: function (commentJSON, success, error) {
+                $.ajax({
+                    type: 'delete',
+                    url: '/api/blog/deleteComment/' + commentJSON.id,
+                    success: () => {
+                        success();
+
+                        commentCount--;
+                        $commentCount.html("(" + commentCount + ")");
+                    },
+                    error: error
+                });
+            },
+            upvoteComment: function (commentJSON, success, error) {
+                if (commentJSON.user_has_upvoted === true) {
+                    $.ajax({
+                        type: 'post',
+                        url: '/api/blog/upvoteComment/' + commentJSON.id,
+                        data: {
+                            parent: commentJSON.parent,
+                            new: {{ article.id }}
+                        },
+                        success: function () {
+                            success(commentJSON);
+                        },
+                        error: error
+                    });
+                } else {
+                    $.ajax({
+                        type: 'DELETE',
+                        url: '/api/blog/upvoteComment/' + commentJSON.id,
+                        success: function () {
+                            success(commentJSON);
+                        },
+                        error: error
+                    });
+                }
+            }
+        });
+    </script>
+
+{% endblock %}

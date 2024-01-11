@@ -1,0 +1,165 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 4 %}
+{% block content %}
+
+    <div class="row">
+            <div class="col-md-12">
+                <div class="d-flex flex-column mx-auto col-md-7 mt-3">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Nom d'utilisateur</span>
+                        <input type="text" class="form-control text-center" id="username" value="{{ member.username }}" style="font-size: 12px">
+                        <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="editInput('username','{{ member.id }}')"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Email</span>
+                        <input type="text" class="form-control text-center" id="email" value="{{ member.email }}" style="font-size: 12px">
+                        <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="editInput('email','{{ member.id }}')"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Mot de passe</span>
+                        <input type="password" class="form-control text-center" id="password" placeholder="Entrer un nouveau mot de passe" style="font-size: 12px">
+                        <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="editInput('password','{{ member.id }}')"><i class="fa-solid fa-check"></i></button>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Statut</span>
+                        <select class="form-select text-center" id="select-state" style="font-size: 12px; padding-left: 1rem">
+                            <option value="1" {% if member.verified == '1' %}selected{% endif %}>Vérifié</option>
+                            <option value="0" {% if member.verified == '0' %}selected{% endif %}>Non vérifié</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Administrateur</span>
+                        <select class="form-select text-center" id="admin" style="font-size: 12px; padding-left: 1rem">
+                            <option value="1" {% if member.is_admin == '1' %}selected{% endif %}>Oui</option>
+                            <option value="0" {% if member.is_admin == '0' %}selected{% endif %}>Non</option>
+                        </select>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="font-size: 12px">Date d'inscription</span>
+                        <input type="text" class="form-control text-center" id="type" value="{{ member.created_at|date('d/m/Y à H:i') }}" style="font-size: 12px" disabled>
+                    </div>
+
+                    <div class="d-flex">
+                        <a href="/admin/members" class="btn btn-primary btn-upper btn-sm btn-pad btn-thin ms-auto mt-3 me-3" style="width: fit-content">Retourner à la liste des membres</a>
+                        <button type="button" class="btn btn-danger btn-upper btn-sm btn-pad btn-thin me-auto mt-3" onclick="deleteMemberVerify()" style="width: fit-content">Supprimer le membre</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    <style>
+        .input-group-text {
+            width: 150px;
+        }
+    </style>
+
+    <script>
+
+        function deleteMemberVerify() {
+
+            new bs5.Toast({
+                body:
+                    '<div class="d-flex gap-3">' +
+                    '<svg class="text-danger flex-shrink-0" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> ' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/> </svg> ' +
+                    '<div> ' +
+                    '<h5>Supprimer ce membre ?</h5> ' +
+                    '<p class="text-secondary mb-2">Si vous supprimez ce membre vous supprimez toutes ses données ainsi que les données liées aux eventuels abonnements et paiements contractés</p>' +
+                    '<button type="button" class="btn btn-light btn-square" data-bs-dismiss="toast">Annuler</button> ' +
+                    '<button type="button" class="btn btn-danger btn-square" onclick="deleteMember()">Confirmer</button> ' +
+                    '</div>' +
+                    '</div>',
+
+                autohide: false,
+                className: 'bg-white',
+                btnClose: false,
+            }).show()
+        }
+
+        function deleteMember() {
+            $.ajax({
+                type: "POST",
+                url: "/api/member/deleteMember",
+                data: {
+                    "id": '{{ member.id }}'
+                },
+                dataType: "JSON",
+                success: function () {
+                    window.location = '/admin/members'
+                }
+            })
+        }
+
+
+        function editInput(element,id,field = null) {
+            if (!field) {
+                field = element
+            }
+            let data = $('#'+element).val();
+            $.ajax({
+                type: "POST",
+                url: "/api/member/edit/"+field,
+                data: {
+                    "id": id,
+                    "field": data
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        }
+
+        $('#select-state').change(function () {
+            let state = $(this).val(),
+                id = '{{ member.id }}'
+            $.ajax({
+                type: "POST",
+                url: "/api/member/edit/verified",
+                data: {
+                    "id": id,
+                    "field": state
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        })
+
+        $('#admin').change(function () {
+            let state = $(this).val(),
+                id = '{{ member.id }}'
+            $.ajax({
+                type: "POST",
+                url: "/api/member/edit/is_admin",
+                data: {
+                    "id": id,
+                    "field": state
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        })
+    </script>
+
+{% endblock %}

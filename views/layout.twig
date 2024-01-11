@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>NA2S PRONO</title>
+
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/main.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700&display=swap" rel="stylesheet">
+
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/toast.min.js"></script>
+
+</head>
+<body>
+{% if auth.logged %}
+<script>
+    let verify_alert = new bs5.Toast({
+        body: `
+                            <div class="d-flex gap-3">
+                              <svg class="text-danger flex-shrink-0" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                              </svg>
+                              <div>
+                                <h5>Confirmer votre compte</h5>
+                                <p class="text-secondary">
+                                  Votre compte n'est pas validé. Rendez-vous dans votre <a href="/profil" class="fw-bold" style="color: #2c3e50">profil</a> pour valider votre email au risque de voir votre compte suspendu.
+                                </p>
+                              </div>
+                            </div>
+                            `,
+        className: 'bg-white',
+        autohide: false,
+        btnClose: false,
+
+        placement: 'top-left',
+    });
+    {% if not auth.user.verified %}
+    verify_alert.show()
+    {% endif %}
+</script>
+{% endif %}
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-md">
+            <a href="/" class="navbar-brand">
+                <img src="/assets/img/logo.png">
+                <div class="m-auto">
+                    <h4>Na2sProno</h4>
+                    <p>Pronostiqueur français</p>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="navbar-nav me-xl-auto">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link" id="homePage">Présentation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/daily-prono" class="nav-link" id="pronoPage">Pronos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/contact" class="nav-link" id="contactPage">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/blogs" class="nav-link" id="blogPage">Articles</a>
+                    </li>
+                </ul>
+                {% if auth.logged %}
+                    <div class="d-flex user-login">
+                        <img class="ms-auto ms-lg-0" src="/assets/img/user.png">
+                        <div class="d-flex flex-column">
+                            <p>{{ auth.user.username }}</p>
+                            {% if auth.user.is_admin %}
+                                <small style="color: #e74c3c">Administrateur</small>
+                            {% elseif auth.subscribed %}
+                                <small>Membre VIP</small>
+                            {% else %}
+                            <small style="color: gray">Membre</small>
+                            {% endif %}
+                        </div>
+                        <div class="dropdown my-auto me-auto me-lg-0">
+                            <a href="#" class="dropdown-login" data-bs-toggle="dropdown"><i class="fa-solid fa-ellipsis-vertical"></i></a>
+                            <ul class="dropdown-menu  dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/profil">Profil</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">Déconnexion</a></li>
+
+                                {% if auth.user.is_admin %}
+                                <li><a class="dropdown-item" href="/admin/">Espace admin</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="d-flex flex-column">
+                        <a href="/register" class="btn btn-warning btn-upper btn-thin">Rejoindre l'équipe</a>
+                        <a href="/login" class="navbar-sign">Déjà membre ? Connectez-vous !</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="container-md mt-5">
+    <div class="alert alert-warning m-0 text-center" role="alert">
+        <b>Attention !</b> Le site est en bêta, des bugs peuvent survenir. Si tu en vois un, signale le à notre équipe !
+    </div>
+</div>
+
+<div class="container-md mb-5">
+    {% block content %}{% endblock %}
+</div>
+
+<footer class="mt-auto">
+    <div class="container d-flex flex-column flex-sm-row">
+        <p class="mx-auto mx-sm-0 mb-3 mb-sm-0 ">
+            Tous droits réservés © 2022 <span>Na2sProno </span>
+            <div style="font-size: 10px; margin: auto 0;">&nbsp&nbsp-&nbsp&nbsp<a href="/terms">Conditions Générales</a>&nbsp&nbsp-&nbsp&nbsp<a href="/rules">Réglement du site</a></div>
+        </p>
+        <p class="mx-auto mx-sm-0 ms-sm-auto">Développé par <a href="https://wogel123.fr">wogel123</a></p>
+    </div>
+</footer>
+<style>
+    footer a:hover {
+        text-decoration: none;
+        color: #f1c410ad;
+    }
+    @media (max-width: 1400px) {
+        .navbar .nav-item {
+            width: 171px;
+        }
+    }
+    @media (max-width: 1200px) {
+        .navbar-nav {
+            width: 67%;
+        }
+        .join-stats h3 {
+            font-size: 18px;
+        }
+        .navbar .nav-item {
+            width: 150px;
+        }
+    }
+    @media (max-width: 992px) {
+        .navbar-brand {
+            height: 85px;
+        }
+        .navbar-nav {
+            margin-right: 0 !important;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .nav-item {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .navbar-collapse {
+            padding-bottom: 25px;
+        }
+        .home p {
+            margin-right: 0;
+        }
+        .home-reviews {
+            margin-left: 0;
+        }
+    }
+    @media (max-width: 576px) {
+        section {
+            padding: 30px;
+        }
+    }
+</style>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

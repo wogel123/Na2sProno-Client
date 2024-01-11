@@ -1,0 +1,336 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+    <section>
+        <div class="row">
+            <div class="col-md-12">
+                <h4 class="title d-flex">Votre profil</h4>
+                <hr>
+                <div class="row flex-column flex-lg-row">
+                    <div class="col-12 col-lg-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <form id="settings_form">
+                                    <h6 class="title">Paramètres</h6>
+                                    <hr>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" name="emailPronostic" id="emailPronostic">
+                                        <label class="form-check-label" for="emailPronostic">Je souhaite recevoir un mail lorsqu'un pronostic est posté</label>
+                                    </div>
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" name="emailSubscription" id="emailSubscription">
+                                        <label class="form-check-label" for="emailSubscription">Je souhaite des emails relatifs au status de mon abonnement</label>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-9">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="title m-0">Vos informations</h6>
+                                <hr>
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Nom d'utilisateur</label>
+                                    <input type="text" class="form-control" disabled placeholder="{{ auth.user.username }}">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Date d'inscription</label>
+                                    <input type="text" class="form-control" disabled placeholder="{{ auth.user.created_at | date('d/m/Y à H:i') }}">
+                                </div>
+                                <div id="loading"></div>
+                                <div class="form-group">
+                                    <label class="control-label d-flex" id="emailprofilhtml">Email
+
+                                        <div id="mail_verify">
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#verifEmail" style="padding-left: 15px;color: #c0392b;font-weight: 400;">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> Cliquer pour vérifier votre email
+                                            </a>
+                                            <div class="modal fade" id="verifEmail" tabindex="-1">
+                                                <div class="modal-dialog" style="font-weight: 400">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <fieldset class="m-0">
+                                                                <form class="d-flex flex-column">
+                                                                    <h4>Vérification de votre email</h4>
+                                                                    <br>
+                                                                    <div id="verifAlert"></div>
+                                                                    <p>Un code de vérification a été envoyé par email à l'adresse suivante : <i>(Pensez à vérifier vos spams)</i><br><b id="emailSent">{{ auth.user.email }}</b></p>
+                                                                    <hr style="margin: 20px 0">
+                                                                    <h4 class="text-center">Entrer le code de vérification pour confirmer votre compte</h4>
+                                                                    <div id="otp" class="inputs d-flex flex-row justify-content-center mt-2">
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="first" maxlength="1" />
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="second" maxlength="1" />
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="third" maxlength="1" />
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="fourth" maxlength="1" />
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="fifth" maxlength="1" />
+                                                                        <input class="m-2 text-center form-control rounded" type="text" id="sixth" maxlength="1" />
+                                                                    </div>
+                                                                    <span id="resendEmail" class="text-center"><a href="#" class="resend-email mx-auto" onclick="resendEmail('{{ auth.user.id }}')">Renvoyer un code</a></span>
+
+                                                                    <input type="button" class="btn btn-dark btn-thin btn-upper btn-pad ms-auto mb-0 mt-4"  value="Vérifier" onclick="verifyEmail('{{ auth.user.id }}')">
+                                                                </form>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </label>
+                                    <input type="text" class="form-control" id="email" value="{{ auth.user.email }}">
+                                </div>
+                                <button type="button" class="btn btn-success btn-upper btn-thin btn-pad ms-auto mt-3" onclick="updateEmail('{{ auth.user.id }}')">Enregistrer</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="title m-0">Sécurité - Changement de votre mot de passe</h6>
+                                <hr>
+                                <div id="profilpassAlert"></div>
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Mot de passe</label>
+                                    <input type="password" class="form-control" id="password"placeholder="Entrer un nouveau mot de passe">
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Confirmer le mot de passe</label>
+                                    <input type="password" class="form-control" id="passwordConfirm" placeholder="Confirmer le mot de passe">
+                                </div>
+                                <button type="button" class="btn btn-danger btn-upper btn-thin btn-pad ms-auto mt-3" onclick="updatePassword('{{ auth.user.id }}')">Changer</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="title m-0">Status de votre abonnement</h6>
+                                <hr>
+
+                                {% if auth.user.is_admin %}
+                                <p class="text-center sub-info">Rang : <span class="label bg-danger">Administrateur</span></p>
+                                {% else %}
+                                <p class="text-center sub-info">Status de votre abonnement :
+                                    {% if auth.subscribed %}
+                                        <span class="label" style="background: #27ae60;" id="substate">Actif</span>
+                                    {% else %}
+                                        <span class="label" id="substate">Aucun abonnement</span>
+                                    {% endif %}
+                                </p>
+
+                                {% if auth.subscribed %}
+                                    <p class="text-center sub-info">Abonnement : <span class="label" style="background: #f1c50b;">Membre VIP</span></p>
+                                    <p class="text-center sub-info">Abonné depuis le : <span class="label">{{ auth.user.subscription.created_at|date('d/m/Y') }}</span></p>
+
+                                    <div class="alert alert-secondary mt-3 mb-0" style="font-size: 12px">
+                                        <h4 class="alert-heading" style="font-size: 12px"><i class="fa-solid fa-circle-info me-2"></i> Comment mettre fin à mon abonnement ?</h4>
+                                        <hr>
+                                        <p>Vous pouvez mettre fin à votre abonnement en vous rendant directement sur votre compte <i><b><span style="color: #00457C">Pay</span><span style="color: #0079C1;">Pal</span></b></i> et en mettant fin à l'abonnement.
+                                            Votre abonnement continuera d'être actif et vous continuerez de bénéficier des pronostics journaliers jusqu'à la fin de la période en cours. Passé la date de fin, votre abonnement
+                                            sera supprimé. Vous pourrez à nouveau vous abonner en vous rendant sur la page d'abonnement.<br><i>(Fin de la période en cours le : <b>{{ auth.user.subscription.end_at|date_modify('- 1 day')|date('d/m/Y') }}</b>)</i> </p>
+                                    </div>
+
+                                {% else %}
+                                    <a href="/register" class="btn btn-warning btn-upper btn-thin btn-pad mx-auto mt-3">S'abonner</a>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+
+        function updatePassword(id) {
+
+            let password        = $('#password').val(),
+                passwordConfirm = $('#passwordConfirm').val()
+
+            if (password ===  '' && passwordConfirm === '') {
+                new bs5.Toast({
+                    body: 'Vous n\'avez effectué aucune modification',
+                    className: 'border-0 bg-danger text-white',
+                    btnCloseWhite: true,
+                    delay: 3000,
+                }).show();
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/auth/updatePassword",
+                    data: {
+                        "id": id,
+                        "password": password,
+                        "passwordConfirm": passwordConfirm
+                    },
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.error) {
+                            let message = "";
+                            for (const [key, value] of Object.entries(data.message)){
+                                message = message + value + "<br>"
+                            }
+                            new bs5.Toast({
+                                body: message,
+                                className: 'border-0 bg-danger text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                        } else {
+                            new bs5.Toast({
+                                body: 'Votre mot de passe a bien été mis à jour',
+                                className: 'border-0 bg-success text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                        }
+                    }
+                })
+            }
+        }
+
+        function resendEmail(id) {
+            $.ajax({
+                type: "POST",
+                url: "/api/auth/resendVerification",
+                data: {
+                    "userid": id
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    $('#verifAlert').html('<div class="alert alert-secondary">'+data.message+'</div>')
+                    $('#resendEmail').html('<p class="resend-email">Vous pourrez redemander un code <br>dans 60 secondes <i class="ms-2 fa-solid fa-spinner fa-spin-pulse"></i></p>')
+                    setTimeout(function() {
+                            $('#resendEmail').html('<a href="#" class="resend-email mx-auto" onclick="resendEmail(\'{{ auth.user.id }}\')">Renvoyer un code</a>')
+                        },60000)
+                },
+                beforeSend: function () {
+                    $('#verifAlert').html("<div class='alert alert-secondary'>Requête en cours de traitement <img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div>")
+                }
+
+            })
+        }
+
+        {% if not auth.user.verified %}
+        $('#mail_verify').show()
+        {% else %}
+        $('#mail_verify').hide()
+        {% endif %}
+
+        let beforeEmail = '{{ auth.user.email }}'
+
+        function updateEmail(id) {
+
+            let email = $('#email').val()
+
+            if (email === beforeEmail) {
+                new bs5.Toast({
+                    body: 'Vous n\'avez effectué aucune modification',
+                    className: 'border-0 bg-danger text-white',
+                    btnCloseWhite: true,
+                    delay: 3000,
+                }).show();
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/auth/updateEmail",
+                    data: {
+                        "email": email,
+                        "id": id
+                    },
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.error) {
+                            let message = "";
+                            for (const [key, value] of Object.entries(data.message)) {
+                                message = message + value + "<br>"
+                            }
+                            $('#email').addClass('is-invalid')
+                            new bs5.Toast({
+                                body: message,
+                                className: 'border-0 bg-danger text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                            $('#loading').html("")
+                        } else {
+                            $('#email').removeClass('is-invalid')
+                            new bs5.Toast({
+                                body: 'Votre adresse mail a bien été mise à jour',
+                                className: 'border-0 bg-success text-white',
+                                btnCloseWhite: true,
+                                delay: 3000,
+                            }).show();
+                            verify_alert.show()
+                            $('#mail_verify').show()
+                            $('#loading').html("")
+                            beforeEmail = email
+                            $('#emailSent').html(email)
+                        }
+                    },
+                    error: function () {
+                        new bs5.Toast({
+                            body: 'Cette adresse mail est déjà utilisée',
+                            className: 'border-0 bg-danger text-white',
+                            btnCloseWhite: true,
+                            delay: 3000,
+                        }).show();
+                        $('#email').addClass('is-invalid')
+                        $('#loading').html("")
+                    },
+                    beforeSend: function () {
+                        $('#loading').html("<div class='alert alert-secondary'>Requête en cours de traitement <img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div>")
+                    }
+                })
+            }
+        }
+
+        function verifyEmail(id) {
+            let first   = $('#first').val(),
+                second  = $('#second').val(),
+                third   = $('#third').val(),
+                fourth  = $('#fourth').val(),
+                fifth   = $('#fifth').val(),
+                sixth   = $('#sixth').val()
+
+            let code = first + second + third + fourth + fifth + sixth
+
+            $.ajax({
+                type: "POST",
+                url: "/api/auth/verifyAccount",
+                data: {
+                    "code": code,
+                    "userid": id
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.error) {
+                        let message = "";
+                        for (const [key, value] of Object.entries(data.message)){
+                            message = message + value + "<br>"
+                        }
+                        $('#verifAlert').html("<div class='alert alert-danger'>" + message + "</div>")
+                    } else {
+                        $('#verifAlert').html("<div class='alert alert-success'>Votre email a bien été vérifiée. Vous allez être redirigé dans quelques instants<img style='margin-left: 10px' src='/assets/img/ajax-loader.gif'></div></div>")
+                        setTimeout(() => {
+                            window.location = "/profil";
+                        }, 2000)
+                    }
+                }
+
+            })
+
+        }
+
+    </script>
+
+    <style>
+        @media (min-width: 576px){
+            .modal-dialog {
+                max-width: 915px;
+            }
+        }
+    </style>
+
+{% endblock %}

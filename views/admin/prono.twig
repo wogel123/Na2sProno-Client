@@ -1,0 +1,339 @@
+{% extends "admin/layout.twig" %}
+
+{% set nav = 3 %}
+{% block content %}
+
+    <div class="row">
+            <div class="col-md-12">
+                <div class="editAlert"></div>
+                <div class="d-flex flex-column text-center">
+                    <h5 class="fw-bold m-0">Prono #{{ ticket.id }}</h5>
+                    <small class="fw-light text-uppercase">Posté le {{ ticket.created_at|date('d/m/Y à H:i') }}</small>
+                    <button type="button" class="btn btn-danger btn-upper btn-sm btn-pad btn-thin mb-3 mx-auto mt-2" onclick="deleteTicket()" style="width: fit-content">Supprimer le ticket</button>
+                </div>
+                <div class="d-flex">
+                    <div class="d-flex flex-column">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" style="font-size: 12px">Status</span>
+                            <select class="form-select" id="select-state" style="font-size: 12px; padding-left: 1rem">
+                                <option value="1" {% if ticket.state == '1' %}selected{% endif %}>Validé</option>
+                                <option value="0" {% if ticket.state == '0' %}selected{% endif %}>Perdu</option>
+                                <option value="2" {% if ticket.state == '2' %}selected{%endif %}>En attente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column ms-auto">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" style="font-size: 12px">Cote</span>
+                            <input type="text" class="form-control text-center" id="odd" value="{{ ticket.odd }}" style="font-size: 12px">
+                            <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="editInput('odd','{{ ticket.id }}')"><i class="fa-solid fa-check"></i></button>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text" style="font-size: 12px">Type</span>
+                            <input type="text" class="form-control text-center" id="type" value="{{ ticket.type }}" style="font-size: 12px">
+                            <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="editInput('type','{{ ticket.id }}')"><i class="fa-solid fa-check"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+
+
+                    {% for match in ticket.match %}
+
+                    <div class="card match-{{ match.id }}">
+                        <div class="card-body">
+                            <button type="button" class="btn btn-danger btn-upper btn-sm btn-pad btn-thin mb-3 mx-auto" onclick="deleteMatch('{{ match.id }}')" style="width: fit-content">Supprimer le match</button>
+
+                            <h5 class="text-center fw-bold m-0 d-flex">
+                                <input type="text" class="form-control text-center" value="{{ match.team1 }}" style="font-size: 12px" id="team1">
+                                <span class="fw-bold my-auto me-2 ms-2" style="font-size: 70%">VS</span>
+                                <input type="text" class="form-control text-center" value="{{ match.team2 }}" style="font-size: 12px" id="team2">
+                            </h5>
+
+                            <div>
+                                <label class="form-label text-center prono-match-time">Date et heure du match :</label>
+                                <input type="text" class="form-control text-center" value="{{ match.time|date('d/m/Y H:i') }}" id="time" style="font-size: 12px">
+                            </div>
+                            <button type="button" class="btn btn-success btn-pad btn-upper btn-thin btn-sm mx-auto mt-3" onclick="saveMatch({{ match.id }})" style="width: fit-content">Enregistrer les modifications</button>
+
+                            <hr>
+                            <h5 class="fw-bold text-center">Pronostic(s) de ce match :</h5>
+
+                            <input type="text" class="d-none" value="{{ match.prono|length }}" id="pronoCount">
+
+                            {% for prono in match.prono %}
+
+                            <div class="d-flex mt-2 prono-{{ prono.id }}">
+                                <div class="input-group">
+                                    <span class="input-group-text" style="font-size: 12px">Type de pronostic</span>
+                                    <input type="text" class="form-control text-center" id="pronoType" value="{{ prono.type }}" style="font-size: 12px">
+                                </div>
+                                <div class="ms-2 input-group">
+                                    <span class="input-group-text" style="font-size: 12px">Pronostic</span>
+                                    <input type="text" class="form-control text-center" id="pronoProno" value="{{ prono.prono }}" style="font-size: 12px">
+                                </div>
+                                <div class="ms-2 input-group">
+                                    <span class="input-group-text" style="font-size: 12px">Cote</span>
+                                    <input type="text" class="form-control text-center" id="pronoOdd" value="{{ prono.odd }}" style="font-size: 12px">
+                                </div>
+                                <button type="button" class="btn btn-danger ms-2" style="border-radius: 4px" onclick="deletePronoVerify('{{ prono.id }}','{{ match.id }}')"><i class="fa-solid fa-xmark"></i></button>
+                                <button type="button" class="btn btn-success ms-2" style="border-radius: 4px" onclick="saveProno('{{ prono.id }}')"><i class="fa-solid fa-check"></i></button>
+                            </div>
+
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+
+    <style>
+        .prono-select-state {
+            font-size: 13px;
+            line-height: 15px;
+            margin-left: 10px;
+        }
+        .prono-match-time {
+            margin-bottom: 0;
+            margin-top: 15px;
+            width: 100%;
+            font-size: 12px;
+            font-weight: 900;
+        }
+    </style>
+
+    <script>
+        $('#time').datetimepicker({
+            autoclose: true,
+            language: "fr",
+            todayHighlight: true,
+            format: 'dd/mm/yyyy hh:ii'
+        });
+
+        function saveMatch(id) {
+            let team1 = $('.match-' + id + ' #team1').val(),
+                team2 = $('.match-' + id + ' #team2').val(),
+                time = $('.match-' + id + ' #time').val()
+
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/editMatch",
+                data: {
+                    "id": id,
+                    "team1": team1,
+                    "team2": team2,
+                    "time": time
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        }
+
+        function saveProno(id) {
+            let type    = $('.prono-' + id + ' #pronoType').val(),
+                prono   = $('.prono-' + id + ' #pronoProno').val(),
+                odd     = $('.prono-' + id + ' #pronoOdd').val()
+
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/editProno",
+                data: {
+                    "id": id,
+                    "type": type,
+                    "prono": prono,
+                    "odd": odd
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        }
+
+        function editInput(element,id,field = null) {
+            if (!field) {
+                field = element
+            }
+            let data = $('#'+element).val();
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/edit/"+field,
+                data: {
+                    "id": id,
+                    "field": data
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        }
+
+        $('#select-state').change(function () {
+            let state = $(this).val(),
+                id = '{{ id }}'
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/editState",
+                data: {
+                    "id": id,
+                    "state": state
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                }
+            })
+        })
+
+        function deleteTicket() {
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/deleteTicket",
+                data: {
+                    "id": '{{ ticket.id }}'
+                },
+                dataType: "JSON",
+                success: function () {
+                    window.location = '/admin/pronos/list'
+                }
+            })
+        }
+
+        function deleteMatch(id) {
+            let matchCount = {{ ticket.match|length }}
+            if (matchCount === 1) {
+                new bs5.Toast({
+                    body:
+                        '<div class="d-flex gap-3">' +
+                        '<svg class="text-danger flex-shrink-0" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> ' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/> </svg> ' +
+                        '<div> ' +
+                        '<h5>Supprimer ce match ?</h5> ' +
+                        '<p class="text-secondary mb-2"> Ce ticket ne contient qu\'un seul match. <br>Si vous supprimez ce match cela supprimera le ticket. Confirmez-vous cette action ? </p>' +
+                        '<button type="button" class="btn btn-light btn-square" data-bs-dismiss="toast">Annuler</button> ' +
+                        '<button type="button" class="btn btn-danger btn-square" onclick="deleteTicket()">Supprimer</button> ' +
+                        '</div>' +
+                        '</div>',
+
+                    autohide: false,
+                    className: 'bg-white',
+                    btnClose: false,
+                }).show()
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/prono/deleteMatch",
+                    data: {
+                        "id": id
+                    },
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('.match-'+id).remove()
+                        new bs5.Toast({
+                            body: data.message,
+                            className: 'border-0 bg-success text-white',
+                            btnCloseWhite: true,
+                            delay: 3000,
+                        }).show();
+                    }
+                })
+            }
+        }
+
+        function deletePronoVerify(id, matchid) {
+            let pronoCount = parseInt($('.match-' + matchid + ' #pronoCount').val())
+            let matchCount = {{ ticket.match|length }}
+            if (pronoCount === 1) {
+                if (matchCount === 1) {
+                    new bs5.Toast({
+                        body:
+                            '<div class="d-flex gap-3">' +
+                            '<svg class="text-danger flex-shrink-0" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> ' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/> </svg> ' +
+                            '<div> ' +
+                            '<h5>Supprimer ce match ?</h5> ' +
+                            '<p class="text-secondary mb-2"> Ce match ne contient qu\'un seul prono et ce ticket ne contient qu\'un seul match. <br>Si vous supprimez ce prono cela supprimera le ticket. Confirmez-vous cette action ? </p>' +
+                            '<button type="button" class="btn btn-light btn-square" data-bs-dismiss="toast">Annuler</button> ' +
+                            '<button type="button" class="btn btn-danger btn-square" onclick="deleteTicket()">Supprimer</button> ' +
+                            '</div>' +
+                            '</div>',
+
+                        autohide: false,
+                        className: 'bg-white',
+                        btnClose: false,
+                    }).show()
+                } else {
+                    new bs5.Toast({
+                        body:
+                            '<div class="d-flex gap-3">' +
+                            '<svg class="text-danger flex-shrink-0" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"> ' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/> </svg> ' +
+                            '<div> ' +
+                            '<h5>Supprimer ce match ?</h5> ' +
+                            '<p class="text-secondary mb-2"> Ce match ne contient qu\'un seul prono. <br>Si vous supprimez ce prono cela supprimera le match. Confirmez-vous cette action ? </p>' +
+                            '<button type="button" class="btn btn-light btn-square" data-bs-dismiss="toast">Annuler</button> ' +
+                            '<button type="button" class="btn btn-danger btn-square" onclick="deleteProno('+id+','+pronoCount+','+matchid+')">Supprimer</button> ' +
+                            '</div>' +
+                            '</div>',
+
+                        autohide: false,
+                        className: 'bg-white',
+                        btnClose: false,
+                    }).show()
+                }
+            } else {
+                deleteProno(id,pronoCount,matchid)
+            }
+        }
+
+        function deleteProno(id,count,matchid) {
+            $.ajax({
+                type: "POST",
+                url: "/api/prono/deleteProno",
+                data: {
+                    "id": id
+                },
+                dataType: "JSON",
+                success: function (data) {
+                    $('.prono-'+id).remove()
+                    new bs5.Toast({
+                        body: data.message,
+                        className: 'border-0 bg-success text-white',
+                        btnCloseWhite: true,
+                        delay: 3000,
+                    }).show();
+                    $('.match-'+matchid+' #pronoCount').attr('value', count - 1)
+                }
+            })
+        }
+
+    </script>
+
+{% endblock %}

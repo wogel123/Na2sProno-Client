@@ -1,0 +1,89 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+
+
+    <section>
+        <div class="daily-prono d-flex flex-column">
+            <a href="/archive" class="btn btn-success btn-pad btn-thin btn-upper mx-auto mb-4" style="width: fit-content">Retourner aux archives</a>
+            <ul class="matchs">
+                    <li class="ticket-info flex-column flex-lg-row">
+                        <p class="id mx-auto mx-lg-0 text-center text-lg-start">Prono <span>#{{ ticket.id }}</span></p>
+                        <p class="posted mx-auto text-center mt-2 mt-lg-0">Posté le <span>{{ match.time|date('d/m/Y') }}</span> à <span>{{ match.time|date('H:i') }}</span></p>
+                        <div class="mx-auto me-lg-0 ms-lg-auto text-center text-lg-end flex-column flex-lg-row">
+                            <p class="type mt-2 mt-lg-0">Type : <span class="label">{{ ticket.type }}</span></p>
+                            <p class="odds mt-2 mt-lg-0 me-0">Cote totale : <span class="label">{{ ticket.odd }}</span></p>
+                        </div>
+                    </li>
+                    <hr style="margin: 20px 0">
+                    <div class="pronomatchlist">
+                        {% for match in ticket.match %}
+                            <li class="match">
+                                <div class="info">
+                                    <p class="date">Match le : <span>{{ match.time|date('d/m/Y') }}</span> à <span>{{ match.time|date('H:i') }}</span></p>
+                                </div>
+                                <div class="teams mt-2">
+                                    <div class="one">
+                                        {#                            <img src="/assets/img/flags/countries/Corée.png">#}
+                                        <small>{{ match.team1 }}</small>
+                                    </div>
+                                    <span>VS</span>
+                                    <div class="two">
+                                        <small>{{ match.team2 }}</small>
+                                        {#                            <img src="/assets/img/flags/countries/Brézil.png">#}
+                                    </div>
+                                </div>
+                                <div class="prono">
+                                    <h3>Pronostique de ce match :</h3>
+
+                                    {% for prono in match.prono %}
+                                        <div class="prono-info">
+                                            <span class="label">{{ prono.type }}</span>
+                                            <p class="result">{{ prono.prono }}</p>
+                                            <p class="odds">Cote : <span class="label">{{ prono.odd }}</span></p>
+                                        </div>
+
+
+                                    {% endfor %}
+                                </div>
+                                <i class="fa-solid fa-plus match-add mt-4"></i>
+                            </li>
+                        {% endfor %}
+                    </div>
+                </ul>
+
+        </div>
+    </section>
+
+    <style>
+        @media (max-width: 992px) {
+            .teams small {
+                font-size: 23px;
+            }
+        }
+        @media (max-width: 768px) {
+            .prono-info {
+                flex-direction: column;
+                padding: 10px 47px;
+                width: fit-content;
+                margin: auto;
+            }
+            .prono-info .label,
+            .prono-info .result,
+            .prono-info .odds {
+                margin: 5px auto;
+            }
+            .teams {
+                background: #e1e4e4;
+                border: 1px solid #d8dadd;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                text-align: center;
+                /* box-shadow: 0px 0px 4px 1px #34495e36; */
+                border-radius: 5px;
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
